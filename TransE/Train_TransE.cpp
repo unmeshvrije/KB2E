@@ -240,10 +240,15 @@ private:
 };
 
 Train train;
-void prepare()
+void prepare(string inputDir)
 {
-    FILE* f1 = fopen("../data/entity2id.txt","r");
-	FILE* f2 = fopen("../data/relation2id.txt","r");
+    // Remove the slash at the end of the inputDir (if given)
+    inputDir.erase(inputDir.find_last_not_of('/')+1);
+    string entity2id_file = inputDir + "/entity2id.txt";
+    string relation2id_file = inputDir + "/relation2id.txt";
+    cout << "input files after processing : " << entity2id_file << endl << relation2id_file << endl;
+    FILE* f1 = fopen(entity2id_file.c_str(), "r");
+	FILE* f2 = fopen(relation2id_file.c_str(), "r");
 	int x;
 	while (fscanf(f1,"%s%d",buf,&x)==2)
 	{
@@ -259,7 +264,10 @@ void prepare()
 		id2relation[x]=st;
 		relation_num++;
 	}
-    FILE* f_kb = fopen("../data/train.txt","r");
+
+    string train_file = inputDir + "/train.txt";
+    cout << "training file = " << train_file << endl;
+    FILE* f_kb = fopen(train_file.c_str(),"r");
 	while (fscanf(f_kb,"%s",buf)==1)
     {
         string s1=buf;
@@ -328,19 +336,22 @@ int main(int argc,char**argv)
     int n = 100;
     double rate = 0.001;
     double margin = 1;
+    string inputDir = ".";
     int i;
     if ((i = ArgPos((char *)"-size", argc, argv)) > 0) n = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-margin", argc, argv)) > 0) margin = atoi(argv[i + 1]);
     if ((i = ArgPos((char *)"-method", argc, argv)) > 0) method = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-inputdir", argc, argv)) > 0) inputDir = argv[i+1];
     cout<<"size = "<<n<<endl;
     cout<<"learing rate = "<<rate<<endl;
     cout<<"margin = "<<margin<<endl;
+    cout <<"Input Dir = " << inputDir << endl;
     if (method)
         version = "bern";
     else
         version = "unif";
     cout<<"method = "<<version<<endl;
-    prepare();
+    prepare(inputDir);
     train.run(n,rate,margin,method);
 }
 
